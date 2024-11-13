@@ -4,13 +4,23 @@ local SOUTH	= defines.direction.south
 local WEST	= defines.direction.west
 local ROTATION = table_size(defines.direction)
 
-script.on_event(defines.events.on_gui_opened, function(event --[[@as EventData.on_gui_opened]])
-	local player = game.get_player(event.player_index) --[[@as LuaPlayer]]
-	if player.gui.relative.btqbuslodtswfowap == nil then
-		local anchor = {gui=defines.relative_gui_type.splitter_gui, position=defines.relative_gui_position.right}
-		local frame = player.gui.relative.add{type="frame", name="btqbuslodtswfowap", anchor=anchor, caption={"btqbuslodtswfowap.block-lane"}}
-		frame.add{type="sprite-button", tooltip={"btqbuslodtswfowap.block-lane"}, sprite="virtual-signal/signal-deny", tags={btqbuslodtswfowap_action=true}}
+---@param player LuaPlayer
+local function create_gui(player)
+	if player.gui.relative.btqbuslodtswfowap then return end
+	local anchor = {gui=defines.relative_gui_type.splitter_gui, position=defines.relative_gui_position.right}
+	player.gui.relative
+		.add{type="frame", name="btqbuslodtswfowap", anchor=anchor, caption={"btqbuslodtswfowap.block-lane"}}
+		.add{type="sprite-button", tooltip={"btqbuslodtswfowap.block-lane"}, sprite="virtual-signal/signal-deny", tags={btqbuslodtswfowap_action=true}}
+end
+
+script.on_init(function()
+	for _, player in pairs(game.players) do
+		create_gui(player)
 	end
+end)
+
+script.on_event(defines.events.on_player_created, function(event --[[@as EventData.on_player_created]])
+	create_gui(game.get_player(event.player_index) --[[@as LuaPlayer]])
 end)
 
 ---@param splitter LuaEntity
@@ -36,7 +46,7 @@ end
 
 script.on_event(defines.events.on_player_flipped_entity, function(event --[[@as EventData.on_player_flipped_entity]])
 	local splitter = event.entity
-	if splitter == nil or (splitter.type ~= "splitter" and splitter.type ~= "entity-ghost" and splitter.ghost_name ~= "splitter") then return end
+	if splitter == nil or not (splitter.type == "splitter" or (splitter.type == "entity-ghost" and splitter.ghost_name == "splitter")) then return end
 	local dir = splitter.direction
 	if (dir ~= NORTH and dir ~= SOUTH and event.horizontal) or (dir ~= EAST and dir ~= WEST and not event.horizontal) then return end
 	local outputs = splitter.belt_neighbours.outputs
