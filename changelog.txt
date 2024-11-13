@@ -1,0 +1,6 @@
+---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+Date: 2024-11-13
+  Features:
+    - GUI button to quickly block the unused lane without any thinking.
+    - Block the unused lane with vertical/horizontal flip action when splitter has no priorities set.
