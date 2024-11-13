@@ -46,7 +46,7 @@ end
 
 script.on_event(defines.events.on_player_flipped_entity, function(event --[[@as EventData.on_player_flipped_entity]])
 	local splitter = event.entity
-	if splitter == nil or not (splitter.type == "splitter" or (splitter.type == "entity-ghost" and splitter.ghost_name == "splitter")) then return end
+	if splitter == nil or not splitter.valid or (splitter.type ~= "splitter" and not (splitter.type == "entity-ghost" and splitter.ghost_name ~= "splitter")) then return end
 	local dir = splitter.direction
 	if (dir ~= NORTH and dir ~= SOUTH and event.horizontal) or (dir ~= EAST and dir ~= WEST and not event.horizontal) then return end
 	local outputs = splitter.belt_neighbours.outputs
@@ -61,7 +61,7 @@ script.on_event(defines.events.on_gui_click, function(event)
 	local evt_ele_tags = event.element.tags
 	if not player or not evt_ele_tags["btqbuslodtswfowap_action"] then return end
 	local splitter = player.opened
-	if splitter == nil or (splitter.type ~= "splitter" and splitter.type ~= "entity-ghost" and splitter.ghost_name ~= "splitter") then return end
+	if splitter == nil or not splitter.valid or (splitter.type ~= "splitter" and not (splitter.type == "entity-ghost" and splitter.ghost_name ~= "splitter")) then return end
 	local outputs = splitter.belt_neighbours.outputs
 	if #outputs ~= 1 then return end
 
