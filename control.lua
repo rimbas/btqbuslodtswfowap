@@ -23,6 +23,21 @@ script.on_event(defines.events.on_player_created, function(event --[[@as EventDa
 	create_gui(game.get_player(event.player_index) --[[@as LuaPlayer]])
 end)
 
+local fallback = "deconstruction-planner"
+
+---@param player number
+---@return string
+local function get_player_filter_item(player)
+	local ply_setting = settings.get_player_settings(player)
+	local value = ply_setting["btqbuslodtswfowap-filter-item"].value
+	if prototypes.item[value] then
+		return value --[[@as string]]
+	end
+	game.print{"", "[color=red]", {"btqbuslodtswfowap.filter-item-wrong", value}, "[/color]"}
+	ply_setting["btqbuslodtswfowap-filter-item"] = {value = fallback}
+	return fallback
+end
+
 ---@param splitter LuaEntity
 ---@param output LuaEntity
 ---@return "left"|"right"
@@ -52,7 +67,8 @@ script.on_event(defines.events.on_player_flipped_entity, function(event --[[@as 
 	local outputs = splitter.belt_neighbours.outputs
 	if #outputs ~= 1 or splitter.splitter_filter ~= nil or splitter.splitter_output_priority ~= "none" or splitter.splitter_input_priority ~= "none" then return end
 
-	splitter.splitter_filter = "deconstruction-planner"
+	local filter = get_player_filter_item(event.player_index)
+	splitter.splitter_filter = filter
 	splitter.splitter_output_priority = get_unused_lane(splitter --[[@as LuaEntity]], outputs[1]--[[@as LuaEntity]])
 end)
 
@@ -65,6 +81,6 @@ script.on_event(defines.events.on_gui_click, function(event)
 	local outputs = splitter.belt_neighbours.outputs
 	if #outputs ~= 1 then return end
 
-	splitter.splitter_filter = "deconstruction-planner"
+	splitter.splitter_filter = get_player_filter_item(event.player_index)
 	splitter.splitter_output_priority = get_unused_lane(splitter --[[@as LuaEntity]], outputs[1]--[[@as LuaEntity]])
 end)
