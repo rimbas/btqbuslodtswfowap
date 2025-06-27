@@ -4,6 +4,10 @@ local SOUTH	= defines.direction.south
 local WEST	= defines.direction.west
 local ROTATION = table_size(defines.direction)
 
+---@alias SplitterPriority
+---| "left"
+---| "right"
+
 ---@param player LuaPlayer
 local function create_gui(player)
 	if player.gui.relative.btqbuslodtswfowap then return end
@@ -38,6 +42,13 @@ local function get_player_filter_item(player)
 	return fallback
 end
 
+---@param entity LuaEntity
+local function get_entity_type(entity)
+	if entity == nil or not entity.valid then return end
+	local typ = entity.type
+	return typ == "entity-ghost" and entity.ghost_type or typ
+end
+
 ---@param splitter LuaEntity
 ---@param output LuaEntity
 ---@return "left"|"right"
@@ -59,28 +70,94 @@ local function get_unused_lane(splitter, output)
 	end
 end
 
+---@param splitter LuaEntity
+---@param filter string
+---@param priority SplitterPriority
+local function set_splitter_settings(splitter, filter, priority)
+	splitter.splitter_filter = filter
+	splitter.splitter_output_priority = priority
+end
+
 script.on_event(defines.events.on_player_flipped_entity, function(event --[[@as EventData.on_player_flipped_entity]])
 	local splitter = event.entity
-	if splitter == nil or not splitter.valid or not (splitter.type == "splitter" or (splitter.type == "entity-ghost" and splitter.ghost_type == "splitter")) then return end
-	local dir = splitter.direction
-	if (dir ~= NORTH and dir ~= SOUTH and event.horizontal) or (dir ~= EAST and dir ~= WEST and not event.horizontal) then return end
-	local outputs = splitter.belt_neighbours.outputs
-	if #outputs ~= 1 or splitter.splitter_filter ~= nil or splitter.splitter_output_priority ~= "none" or splitter.splitter_input_priority ~= "none" then return end
+	local typ = get_entity_type(splitter)
+	if typ == "splitter" then
+		local dir = splitter.direction
+		if (dir ~= NORTH and dir ~= SOUTH and event.horizontal) or (dir ~= EAST and dir ~= WEST and not event.horizontal) then return end
+		local outputs = splitter.belt_neighbours.outputs
+		if #outputs ~= 1 or splitter.splitter_filter ~= nil or splitter.splitter_output_priority ~= "none" or splitter.splitter_input_priority ~= "none" then return end
 
-	local filter = get_player_filter_item(event.player_index)
-	splitter.splitter_filter = filter
-	splitter.splitter_output_priority = get_unused_lane(splitter --[[@as LuaEntity]], outputs[1]--[[@as LuaEntity]])
+		set_splitter_settings(
+			splitter,
+			get_player_filter_item(event.player_index),
+			get_unused_lane(splitter --[[@as LuaEntity]], outputs[1]--[[@as LuaEntity]])
+		)
+	elseif typ == "lane-splitter" then
+		-- local neighbours = splitter.belt_neighbours
+		if splitter.splitter_filter ~= nil or splitter.splitter_output_priority ~= "none" or splitter.splitter_input_priority ~= "none" then return end
+		set_splitter_settings(
+			splitter,
+			get_player_filter_item(event.player_index),
+			"right"
+		)
+		-- if #neighbours.outputs == 0 then
+		-- else
+		-- 	local outputs = splitter.belt_neighbours.outputs
+			
+		-- 	---@param lane LuaTransportLine
+		-- 	---@param text any
+		-- 	local function render_transport_line_end(lane, text)
+		-- 		local pos = lane.get_line_item_position(0)
+		-- 		rendering.draw_circle{
+		-- 			surface = splitter.surface_index,
+		-- 			target= pos,
+		-- 			radius = 0.1,
+		-- 			filled = true,
+		-- 			color = {1, 1, 1}
+		-- 		}
+		-- 		rendering.draw_text{
+		-- 			surface = splitter.surface_index,
+		-- 			target = pos,
+		-- 			text = text,
+		-- 			color = {0, 0, 0},
+		-- 			vertical_alignment = "middle",
+		-- 			alignment = "center",
+		-- 			scale = 0.5,
+		-- 		}
+		-- 	end
+			
+		-- 	---@param belt LuaEntity
+		-- 	local function traverse_belt(belt)
+		-- 		if belt.type ~= "belt" then return end
+		-- 		return output
+		-- 	end
+		-- 	-- game.print("huh")
+		-- end
+	-- else
+	-- 	game.print("huh")
+	end
 end)
 
 script.on_event(defines.events.on_gui_click, function(event)
 	local player = game.get_player(event.player_index)
 	local evt_ele_tags = event.element.tags
 	if not player or not evt_ele_tags["btqbuslodtswfowap_action"] then return end
-	local splitter = player.opened
-	if splitter == nil or not splitter.valid or not (splitter.type == "splitter" or (splitter.type == "entity-ghost" and splitter.ghost_type == "splitter")) then return end
-	local outputs = splitter.belt_neighbours.outputs
-	if #outputs ~= 1 then return end
+	local splitter = player.opened --[[@as LuaEntity]]
+	local typ = get_entity_type(splitter)
+	if typ == "splitter" then
+		local outputs = splitter.belt_neighbours.outputs
+		if #outputs ~= 1 then return end
 
-	splitter.splitter_filter = get_player_filter_item(event.player_index)
-	splitter.splitter_output_priority = get_unused_lane(splitter --[[@as LuaEntity]], outputs[1]--[[@as LuaEntity]])
+		set_splitter_settings(
+			splitter --[[@as LuaEntity]],
+			get_player_filter_item(event.player_index),
+			get_unused_lane(splitter --[[@as LuaEntity]], outputs[1]--[[@as LuaEntity]])
+		)
+	elseif typ == "lane-splitter" then
+		set_splitter_settings(
+			splitter,
+			get_player_filter_item(event.player_index),
+			"right"
+		)
+	end
 end)

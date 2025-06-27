@@ -1,9 +1,9 @@
 {
 	"name": "btqbuslodtswfowap",
-	"version": "1.1.0",
+	"version": "1.1.2",
 	"title": "Button To Quickly Block Unused Splitter Lane Or Do The Same When Flipping One Without Any Priorities",
 	"author": "Rimbas",
 	"factorio_version": "2.0",
-	"dependencies": ["base"],
+	"dependencies": ["base", "? atan-null"],
 	"description": "Adds two ways to block the unused lane of a splitter without any thinking \"is it left or right?\" and no going into the filter menu for that deconstruction planner."
 }
