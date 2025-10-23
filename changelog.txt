@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.0
+Date: 2025-10-23
+  Features:
+    - Added a player setting to automatically filter the splitter on placement if conditions allow.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.2
 Date: 2025-06-27
   Bugfixes:

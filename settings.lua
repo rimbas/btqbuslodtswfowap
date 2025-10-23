@@ -11,4 +11,15 @@ data:extend{
 		setting_type="runtime-per-user",
 		default_value=default_value,
 	},
+	{
+		type="string-setting",
+		name="btqbuslodtswfowap-auto-filter",
+		setting_type="runtime-per-user",
+		default_value="no-auto",
+		allowed_values={
+			"no-auto",
+			"single-output",
+			"fully-defined",
+		},
+	},
 }

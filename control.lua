@@ -4,9 +4,14 @@ local SOUTH	= defines.direction.south
 local WEST	= defines.direction.west
 local ROTATION = table_size(defines.direction)
 
----@alias SplitterPriority
+---@alias NarrowedSplitterPriority
 ---| "left"
 ---| "right"
+
+---@alias PlayerSutoFilterSetting
+---| "no-auto
+---| "single-output"
+---| "fully-defined"
 
 ---@param player LuaPlayer
 local function create_gui(player)
@@ -42,6 +47,12 @@ local function get_player_filter_item(player)
 	return fallback
 end
 
+---@param player number
+---@return PlayerSutoFilterSetting
+local function get_player_auto_filter(player)
+	return settings.get_player_settings(player)["btqbuslodtswfowap-auto-filter"].value --[[@as PlayerSutoFilterSetting]]
+end
+
 ---@param entity LuaEntity
 local function get_entity_type(entity)
 	if entity == nil or not entity.valid then return end
@@ -72,7 +83,7 @@ end
 
 ---@param splitter LuaEntity
 ---@param filter string
----@param priority SplitterPriority
+---@param priority NarrowedSplitterPriority
 local function set_splitter_settings(splitter, filter, priority)
 	splitter.splitter_filter = filter
 	splitter.splitter_output_priority = priority
@@ -161,3 +172,36 @@ script.on_event(defines.events.on_gui_click, function(event)
 		)
 	end
 end)
+
+---@param event EventData.on_built_entity
+local function created_entity(event)
+	local splitter = event.entity
+	local player = game.get_player(event.player_index)
+	if not splitter or not splitter.valid or (player and player.is_cursor_blueprint()) then return end
+	
+	
+	local neighbours = splitter.belt_neighbours
+	local outputs = neighbours.outputs
+	local player_setting = get_player_auto_filter(event.player_index)
+	local in_c, out_c = #neighbours.inputs, #outputs
+	
+	if (
+		player_setting == "fully-defined" and in_c == 2 and out_c == 1
+		or player_setting == "single-output" and out_c == 1
+	) then
+		set_splitter_settings(
+			splitter,
+			get_player_filter_item(event.player_index),
+			get_unused_lane(splitter --[[@as LuaEntity]], outputs[1]--[[@as LuaEntity]])
+		)
+	end
+end
+
+script.on_event(
+	defines.events.on_built_entity,
+	created_entity,
+	{
+		{filter="type", type="splitter"},
+		{filter="ghost_type", type="splitter", mode="or"},
+	}
+)
