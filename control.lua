@@ -32,7 +32,7 @@ script.on_event(defines.events.on_player_created, function(event --[[@as EventDa
 	create_gui(game.get_player(event.player_index) --[[@as LuaPlayer]])
 end)
 
-local fallback = "deconstruction-planner"
+local fallback = "no-item"
 
 ---@param player number
 ---@return string
