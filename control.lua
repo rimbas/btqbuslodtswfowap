@@ -157,7 +157,14 @@ script.on_event(defines.events.on_gui_click, function(event)
 	local typ = get_entity_type(splitter)
 	if typ == "splitter" then
 		local outputs = splitter.belt_neighbours.outputs
-		if #outputs ~= 1 then return end
+		if #outputs ~= 1 then
+			set_splitter_settings(
+				splitter,
+				get_player_filter_item(event.player_index),
+				"right"
+			)
+			return
+		end
 
 		set_splitter_settings(
 			splitter --[[@as LuaEntity]],
@@ -205,3 +212,12 @@ script.on_event(
 		{filter="ghost_type", type="splitter", mode="or"},
 	}
 )
+
+script.on_event(defines.events.on_runtime_mod_setting_changed, function(event)
+	if event.setting ~= "btqbuslodtswfowap-show-splitter-gui" then return end
+	local player = game.get_player(event.player_index)
+	if not player then return end
+	local gui = player.gui.relative.btqbuslodtswfowap
+	if not gui then return end
+	gui.visible = settings.get_player_settings(player)["btqbuslodtswfowap-show-splitter-gui"].value --[[@as boolean]]
+end)

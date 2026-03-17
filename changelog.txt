@@ -1,6 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.2
+Date: 2026-03-17
+  Changes:
+    - GUI button now sets the filter in any case.
+    - Added a player setting to hide the splitter GUI.
+---------------------------------------------------------------------------------------------------
 Version: 1.2.1
-Date: 2026-02-22
+Date: 2026-03-09
   Changes:
     - Removed "Null Item" mod integration since it's obsoleted by built in "no-item".
 ---------------------------------------------------------------------------------------------------

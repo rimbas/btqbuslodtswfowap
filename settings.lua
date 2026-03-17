@@ -16,4 +16,10 @@ data:extend{
 			"fully-defined",
 		},
 	},
+	{
+		type="bool-setting",
+		name="btqbuslodtswfowap-show-splitter-gui",
+		setting_type="runtime-per-user",
+		default_value=true,
+	},
 }
